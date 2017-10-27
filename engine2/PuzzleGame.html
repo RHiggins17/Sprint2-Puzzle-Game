@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<!--
+Name: Rachel Higgins
+Class: CS 4183 Video Game Design
+Semester: Fall 2017
+Professor: David Cline
+Assignment: Sprint 2
+Goal: Find the four matching pairs to win.
+Credits:
+		Music: from https://www.bensound.com/royalty-free-music/track/memories by Bensound Royalty-free music.
+ -->
+
+<!-- HTML HEAD ELEMENT - DEFINES CSS FOR THE PAGE -->
+<head>
+	<meta charset="utf-8">
+    <style>
+	    body { background-color: #002200; }
+	    h3,p { color: #FFFF00; }
+	    canvas { background-color: #000044; }
+	    #debugContainer { color: #FFFFFF; position: absolute; z-index: 100;}
+    </style>
+    <title>Puzzle Game</title>
+</head>
+
+<!-- ==================================================================== -->
+
+<!-- HTML BODY TAG - DEFINES THE HTML LAYOUT FOR THE PAGE -->
+<body oncontextmenu="return false;">
+
+<!-- INCLUDE SCRIPTS -->
+<script src="../threejs/build/three.js"></script>
+<script src="gameEngine2.js"></script>
+
+<!-- GAME SPECIFIC INCLUDES -->
+<script src="puzzleObjects.js"></script>
+
+<!-- DEFINE LEFT DIV TAG - FOR DEBUG PRINTOUTS -->
+<div id="debugContainer">
+<pre id="debug"></pre>
+</div>
+
+<!-- MAKE CANVAS AND OTHER STARTING ELEMENTS  -->
+<center>
+	<br/>
+	<h3 id="scoreboard">Puzzle Game: Find all of the matching spheres in thirty seconds.  Click on rectangle to reveal a sphere.</h3>
+	<canvas id="canvas" width="800" height="500"></canvas>
+	<audio id="music"><source src="memories.mp3"></source></audio>
+</center>
+
+
+<script>
+//----------------------------------------------------------------------//
+// VARIABLES
+//---------------------------------------------------------------------
+	//
+	var count = 0;
+	//Keeps count of the number of pairs found.
+	var success = 0;
+	//Keep track of the cubes clicked.
+	var mouseDownObj1;
+	var mouseDownObj2;
+	//Hold all nine cube objects to randomize sphere positions.
+	var	sqr1;
+	var	sqr2;
+	var	sqr3;
+	var	sqr4;
+	var	sqr5;
+	var	sqr6;
+	var	sqr7;
+	var	sqr8;
+	var	sqr9;
+	//Holds sphere objects to be randomized.
+	var	cir1;
+	var	cir2;
+	var	cir3;
+	var	cir4;
+	var	cir5;
+	var	cir6;
+	var	cir7;
+	var	cir8;
+	var	cir9;
+	
+//----------------------------------------------------------------------//
+// THE MAIN CODE FOR THE GAME
+//----------------------------------------------------------------------//
+	
+	//Called upon winning the game.  Removes abilty to click and reloads.
+	var win = function()
+    {
+		var points = document.getElementById("scoreboard");
+		points.innerHTML = "You win!";
+		window.removeEventListener("mouseDown", onMouseDown);
+		var refresh = setTimeout(reload, 2000); 
+		//return true;
+    }
+	
+	//Reloads the screen to restart the game.
+	var reload = function()
+    {
+		location.reload();
+    }
+	
+	//Sets the position of the spheres to different cubes to randomize.
+	var randomizeSpheres = function()
+	{
+		//Math.random's value determines the pattern of the spheres.
+		var random = Math.random();
+		
+		//All of the if-else statements change the spheres x and y position
+		//based on the random value.  There are ten variations.
+		if(random <= 0.1)
+		{
+			cir1.position.x = sqr1.position.x;
+			cir1.position.y = sqr1.position.y;
+			cir2.position.x = sqr2.position.x;
+			cir2.position.y = sqr2.position.y;
+			cir3.position.x = sqr3.position.x;
+			cir3.position.y = sqr3.position.y;
+			cir4.position.x = sqr4.position.x;
+			cir4.position.y = sqr4.position.y;
+			cir5.position.x = sqr5.position.x;
+			cir5.position.y = sqr5.position.y;
+			cir6.position.x = sqr6.position.x;
+			cir6.position.y = sqr6.position.y;
+			cir7.position.x = sqr7.position.x;
+			cir7.position.y = sqr7.position.y;
+			cir8.position.x = sqr8.position.x;
+			cir8.position.y = sqr8.position.y;
+			cir9.position.x = sqr9.position.x;
+			cir9.position.y = sqr9.position.y;
+		}
+		else if(random <= 0.2)
+		{
+			cir1.position.x = sqr2.position.x;
+			cir1.position.y = sqr2.position.y;
+			cir2.position.x = sqr5.position.x;
+			cir2.position.y = sqr5.position.y;
+			cir3.position.x = sqr6.position.x;
+			cir3.position.y = sqr6.position.y;
+			cir4.position.x = sqr1.position.x;
+			cir4.position.y = sqr1.position.y;
+			cir5.position.x = sqr8.position.x;
+			cir5.position.y = sqr8.position.y;
+			cir6.position.x = sqr3.position.x;
+			cir6.position.y = sqr3.position.y;
+			cir7.position.x = sqr4.position.x;
+			cir7.position.y = sqr4.position.y;
+			cir8.position.x = sqr9.position.x;
+			cir8.position.y = sqr9.position.y;
+			cir9.position.x = sqr7.position.x;
+			cir9.position.y = sqr7.position.y;
+		}
+		else if(random <= 0.3)
+		{
+			cir1.position.x = sqr9.position.x;
+			cir1.position.y = sqr9.position.y;
+			cir2.position.x = sqr6.position.x;
+			cir2.position.y = sqr6.position.y;
+			cir3.position.x = sqr3.position.x;
+			cir3.position.y = sqr3.position.y;
+			cir4.position.x = sqr7.position.x;
+			cir4.position.y = sqr7.position.y;
+			cir5.position.x = sqr8.position.x;
+			cir5.position.y = sqr8.position.y;
+			cir6.position.x = sqr1.position.x;
+			cir6.position.y = sqr1.position.y;
+			cir7.position.x = sqr4.position.x;
+			cir7.position.y = sqr4.position.y;
+			cir8.position.x = sqr5.position.x;
+			cir8.position.y = sqr5.position.y;
+			cir9.position.x = sqr2.position.x;
+			cir9.position.y = sqr2.position.y;
+		}
+		else if(random <= 0.4)
+		{
+			cir1.position.x = sqr7.position.x;
+			cir1.position.y = sqr7.position.y;
+			cir2.position.x = sqr1.position.x;
+			cir2.position.y = sqr1.position.y;
+			cir3.position.x = sqr8.position.x;
+			cir3.position.y = sqr8.position.y;
+			cir4.position.x = sqr4.position.x;
+			cir4.position.y = sqr4.position.y;
+			cir5.position.x = sqr3.position.x;
+			cir5.position.y = sqr3.position.y;
+			cir6.position.x = sqr5.position.x;
+			cir6.position.y = sqr5.position.y;
+			cir7.position.x = sqr9.position.x;
+			cir7.position.y = sqr9.position.y;
+			cir8.position.x = sqr2.position.x;
+			cir8.position.y = sqr2.position.y;
+			cir9.position.x = sqr6.position.x;
+			cir9.position.y = sqr6.position.y;
+		}
+		else if(random <= 0.5)
+		{
+			cir1.position.x = sqr4.position.x;
+			cir1.position.y = sqr4.position.y;
+			cir2.position.x = sqr3.position.x;
+			cir2.position.y = sqr3.position.y;
+			cir3.position.x = sqr5.position.x;
+			cir3.position.y = sqr5.position.y;
+			cir4.position.x = sqr9.position.x;
+			cir4.position.y = sqr9.position.y;
+			cir5.position.x = sqr8.position.x;
+			cir5.position.y = sqr8.position.y;
+			cir6.position.x = sqr2.position.x;
+			cir6.position.y = sqr2.position.y;
+			cir7.position.x = sqr1.position.x;
+			cir7.position.y = sqr1.position.y;
+			cir8.position.x = sqr7.position.x;
+			cir8.position.y = sqr7.position.y;
+			cir9.position.x = sqr6.position.x;
+			cir9.position.y = sqr6.position.y;
+		}
+		else if(random <= 0.6)
+		{
+			cir1.position.x = sqr6.position.x;
+			cir1.position.y = sqr6.position.y;
+			cir2.position.x = sqr2.position.x;
+			cir2.position.y = sqr2.position.y;
+			cir3.position.x = sqr1.position.x;
+			cir3.position.y = sqr1.position.y;
+			cir4.position.x = sqr5.position.x;
+			cir4.position.y = sqr5.position.y;
+			cir5.position.x = sqr3.position.x;
+			cir5.position.y = sqr3.position.y;
+			cir6.position.x = sqr7.position.x;
+			cir6.position.y = sqr7.position.y;
+			cir7.position.x = sqr9.position.x;
+			cir7.position.y = sqr9.position.y;
+			cir8.position.x = sqr8.position.x;
+			cir8.position.y = sqr8.position.y;
+			cir9.position.x = sqr4.position.x;
+			cir9.position.y = sqr4.position.y;
+		}
+		else if(random <= 0.7)
+		{
+			cir1.position.x = sqr3.position.x;
+			cir1.position.y = sqr3.position.y;
+			cir2.position.x = sqr1.position.x;
+			cir2.position.y = sqr1.position.y;
+			cir3.position.x = sqr2.position.x;
+			cir3.position.y = sqr2.position.y;
+			cir4.position.x = sqr6.position.x;
+			cir4.position.y = sqr6.position.y;
+			cir5.position.x = sqr8.position.x;
+			cir5.position.y = sqr8.position.y;
+			cir6.position.x = sqr4.position.x;
+			cir6.position.y = sqr4.position.y;
+			cir7.position.x = sqr9.position.x;
+			cir7.position.y = sqr9.position.y;
+			cir8.position.x = sqr7.position.x;
+			cir8.position.y = sqr7.position.y;
+			cir9.position.x = sqr5.position.x;
+			cir9.position.y = sqr5.position.y;
+		}
+		else if(random <= 0.8)
+		{
+			cir1.position.x = sqr8.position.x;
+			cir1.position.y = sqr8.position.y;
+			cir2.position.x = sqr9.position.x;
+			cir2.position.y = sqr9.position.y;
+			cir3.position.x = sqr7.position.x;
+			cir3.position.y = sqr7.position.y;
+			cir4.position.x = sqr2.position.x;
+			cir4.position.y = sqr2.position.y;
+			cir5.position.x = sqr3.position.x;
+			cir5.position.y = sqr3.position.y;
+			cir6.position.x = sqr6.position.x;
+			cir6.position.y = sqr6.position.y;
+			cir7.position.x = sqr5.position.x;
+			cir7.position.y = sqr5.position.y;
+			cir8.position.x = sqr1.position.x;
+			cir8.position.y = sqr1.position.y;
+			cir9.position.x = sqr4.position.x;
+			cir9.position.y = sqr4.position.y;
+		}
+		else if(random <= 0.9)
+		{
+			cir1.position.x = sqr5.position.x;
+			cir1.position.y = sqr5.position.y;
+			cir2.position.x = sqr2.position.x;
+			cir2.position.y = sqr2.position.y;
+			cir3.position.x = sqr3.position.x;
+			cir3.position.y = sqr3.position.y;
+			cir4.position.x = sqr7.position.x;
+			cir4.position.y = sqr7.position.y;
+			cir5.position.x = sqr8.position.x;
+			cir5.position.y = sqr8.position.y;
+			cir6.position.x = sqr1.position.x;
+			cir6.position.y = sqr1.position.y;
+			cir7.position.x = sqr9.position.x;
+			cir7.position.y = sqr9.position.y;
+			cir8.position.x = sqr4.position.x;
+			cir8.position.y = sqr4.position.y;
+			cir9.position.x = sqr6.position.x;
+			cir9.position.y = sqr6.position.y;
+		}
+		else if(random <= 1.0)
+		{
+			cir1.position.x = sqr4.position.x;
+			cir1.position.y = sqr4.position.y;
+			cir2.position.x = sqr8.position.x;
+			cir2.position.y = sqr8.position.y;
+			cir3.position.x = sqr2.position.x;
+			cir3.position.y = sqr2.position.y;
+			cir4.position.x = sqr6.position.x;
+			cir4.position.y = sqr6.position.y;
+			cir5.position.x = sqr3.position.x;
+			cir5.position.y = sqr3.position.y;
+			cir6.position.x = sqr7.position.x;
+			cir6.position.y = sqr7.position.y;
+			cir7.position.x = sqr9.position.x;
+			cir7.position.y = sqr9.position.y;
+			cir8.position.x = sqr5.position.x;
+			cir8.position.y = sqr5.position.y;
+			cir9.position.x = sqr1.position.x;
+			cir9.position.y = sqr1.position.y;
+		}
+	}
+	
+//----------------------------------------------------------------------//
+// THE LOADING AND ANIMATION CODE FOR THE GAME
+//----------------------------------------------------------------------//
+
+	//Holds and helps animate the game objects.
+	var animateGame = function()
+	{
+		// Call animateGame again in about 1/60 of a second
+		requestAnimationFrame(animateGame);
+		
+		//Holds all scene objects.  The sqr variables each hold a cube
+		//to use in randomizeSpheres.
+		var scene = gameState.scene;
+		sqr1 = scene;
+		sqr1 = scene.getObjectByName("cube1", true);
+		sqr12 = scene;
+		sqr2 = scene.getObjectByName("cube2", true);
+		sqr3 = scene;
+		sqr3 = scene.getObjectByName("cube3", true);
+		sqr4 = scene;
+		sqr4 = scene.getObjectByName("cube4", true);
+		sqr5 = scene;
+		sqr5 = scene.getObjectByName("cube5", true);
+		sqr6 = scene;
+		sqr6 = scene.getObjectByName("cube6", true);
+		sqr7 = scene;
+		sqr7 = scene.getObjectByName("cube7", true);
+		sqr8 = scene;
+		sqr8 = scene.getObjectByName("cube8", true);
+		sqr9 = scene;
+		sqr9 = scene.getObjectByName("cube9", true);
+		//Hold the sphere objects.  Used in randomizeSpheres and given
+		//different positions based on a random value for the game.
+		cir1 = scene;
+		cir1 = scene.getObjectByName("sphere1", true);
+		cir2 = scene;
+		cir2 = scene.getObjectByName("sphere2", true);
+		cir3 = scene;
+		cir3 = scene.getObjectByName("sphere3", true);
+		cir4 = scene;
+		cir4 = scene.getObjectByName("sphere4", true);
+		cir5 = scene;
+		cir5 = scene.getObjectByName("sphere5", true);
+		cir6 = scene;
+		cir6 = scene.getObjectByName("sphere6", true);
+		cir7 = scene;
+		cir7 = scene.getObjectByName("sphere7", true);
+		cir8 = scene;
+		cir8 = scene.getObjectByName("sphere8", true);
+		cir9 = scene;
+		cir9 = scene.getObjectByName("sphere9", true);
+		
+		//randomizeSpheres is called to move the spheres to different
+		//positions so the game varies each time.
+		if(count < 1)
+		{
+			randomizeSpheres();
+		}
+		//Count is iterated to keep randomizeSpheres from reoccurring anf startGameLoop starts engine animation.
+		count++;
+		startGameLoop();
+	}
+	//Run as soon as the screen loads to start game.
+	window.onload = function()
+	{
+		// Start engine in full screen mode (really just full browswer)
+		engine.DEBUG = false;
+		//Sets the canvas and controls for the game and starts music.
+		canvas = document.getElementById("canvas");
+		initEngine(canvas);
+		gameState.onMouseDown = onMouseDown;
+		gameState.score = 0;
+		var music = document.getElementById("music");
+		music.play();
+		// Parse the scene and start the game loop
+		parseScene(objects);
+		//Get the scene and its objects, the spheres and two rectangles.
+		animateGame();
+	}
+	
+//----------------------------------------------------------------------//
+// CONTROL SCRIPTS
+//----------------------------------------------------------------------//
+	//Gets an array of objects clicked on.
+	var rayCastSelect = function(mouseX, mouseY, canvas, camera, objects) 
+	{
+		//Gets the normal vector and finds the position.
+		var rect = canvas.getBoundingClientRect();
+		var x = mouseX - rect.left;
+		var y = canvas.height - (mouseY - rect.top);
+		var vector = new THREE.Vector3(2 * (x / canvas.width) - 1, 2 * (y / canvas.height) - 1, 0.5);
+
+		//Gets the direction vector of that position in relation the camera.
+		vector = vector.unproject(camera);
+		var direction = vector.sub(camera.position).normalize();
+
+		//Creates a Raycaster objects and finds the objects it intersects.
+		var raycaster = new THREE.Raycaster(camera.position, direction);
+		var intersected = raycaster.intersectObjects(objects);
+		return intersected;
+	}
+	//The onMouseDown make intersected cubes disappear.
+	var onMouseDown = function(event)
+	{
+		console.log("Down");
+		//Gets the mouse's x and y position in relation to the camera and canvas
+		//to use Raycaster's function to find the intersected objects.
+		var clientX = event.clientX;
+		var clientY = event.clientY;
+		var canvas = engine.canvas;
+		var camera = gameState.camera;
+		var objects = gameState.scene.children;
+		var intersected = rayCastSelect(clientX, clientY, canvas, camera, objects);
+		//Finds the cube and makes it invisible if intersected.
+		if(intersected[0].object.name.substring(0,4) == 'cube') 
+		{
+			intersected[0].object.visible = false;
+			//If the first cube has been stored, a second one is stored
+			//and checkObjects compares the hidden spheres.  The vars holding the
+			// cubes are emptied for reuse.
+			if(mouseDownObj1)
+			{
+				mouseDownObj2 = intersected[0];
+				checkObjects(mouseDownObj1, mouseDownObj2);
+				var emptyVariable;
+				mouseDownObj1 = emptyVariable;
+				mouseDownObj2 = emptyVariable;
+			}
+			//The first cube found is stored here.
+			else 
+			{
+				mouseDownObj1 = intersected[0];
+			}
+		}
+	}
+	//Compares the spheres to see if their colors match.
+	var checkObjects = function(obj1, obj2)
+	{
+		//Array holds all sphere objects, while checkCirs will hold the two spheres
+		//whose x and y coordinates match the cubes clicked.
+		var circleArray = [cir1, cir2, cir3, cir4, cir5, cir6, cir7, cir8, cir9];
+		var checkCir1;
+		var checkcir2;
+		//Iterates through the array to find the spheres with the cubes' corrdinates.
+		for(var i = 0; i < circleArray.length; i++)
+		{
+			if(circleArray[i].position.x == obj1.object.position.x &&
+			   circleArray[i].position.y == obj1.object.position.y)
+			{
+				checkCir1 = circleArray[i];
+			}
+			
+			if(circleArray[i].position.x == obj2.object.position.x &&
+			   circleArray[i].position.y == obj2.object.position.y)
+			{
+				checkCir2 = circleArray[i];
+			}
+		
+		}
+		//Compates the colors of the spheres found.  If they match, a point is added to success.
+		//Otherwise, the cubes become visible again and hide the spheres.
+		if(checkCir1.material.color.r == checkCir2.material.color.r &&
+		   checkCir1.material.color.g == checkCir2.material.color.g &&
+		   checkCir1.material.color.b == checkCir2.material.color.b)
+		{
+			success += 1;
+		} 
+		else 
+		{
+			obj1.object.visible = true;
+			obj2.object.visible = true;
+		}
+		//Calls the win function to end the game if all four paired spheres are found.
+		if(success == 4)
+		{
+			win();
+		}
+	}
+</script>
+
+</body>
+</html>

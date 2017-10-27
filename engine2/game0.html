@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+
+<!-- HTML HEAD ELEMENT - DEFINES CSS FOR THE PAGE -->
+<head>
+	<meta charset="utf-8">
+    <style>
+	    body { background-color: #002200; }
+	    h3,p { color: #FFFF00; }
+	    canvas { background-color: #000044; }
+	    #debugContainer { color: #FFFFFF; position: absolute; z-index: 100;}
+    </style>
+    <title>Game Example</title>
+</head>
+
+<!-- ==================================================================== -->
+
+<!-- HTML BODY TAG - DEFINES THE HTML LAYOUT FOR THE PAGE -->
+<body oncontextmenu="return false;">
+
+<!-- INCLUDE SCRIPTS -->
+<script src="../threejs/build/three.js"></script>
+<script src="gameEngine1.js"></script>
+
+<!-- GAME SPECIFIC INCLUDES -->
+<script src="game0data.js"></script>
+
+<!-- DEFINE LEFT DIV TAG - FOR DEBUG PRINTOUTS -->
+<div id="debugContainer">
+<pre id="debug"></pre>
+</div>
+
+<!-- MAKE CANVAS AND OTHER STARTING ELEMENTS  -->
+<center>
+	<br/>
+	<h3 id="header">Super Stress Ball by David Cline</h3>
+	<canvas id="gameCanvas" width="600" height="400"></canvas>
+	<h3 id="scoreboard">Press arrow keys to squeeze the big sphere!</h3>
+</center>
+
+
+<script>
+//----------------------------------------------------------------------//
+// THE MAIN CODE FOR THE GAME
+//----------------------------------------------------------------------//
+
+window.onload = function()
+{
+	// Start engine in full screen mode (really just full browswer)
+	// It will create its own canvas element in this case.
+	engine.DEBUG = false;
+	//initEngineFullScreen();
+	var canvas = document.getElementById("gameCanvas");
+	initEngine(canvas);
+
+	gameState.onKeyDown = onKeyDown;
+
+	gameState.score = 0;
+
+	// Parse the scene and start the game loop
+	parseScene(level0);
+	expandRandom();
+
+	startGameLoop();
+}
+
+//----------------------------------------------------------------------//
+// CONTROL SCRIPTS
+//----------------------------------------------------------------------//
+
+var onKeyDown = function(event)
+{
+	var scoreboard = document.getElementById("scoreboard");
+	var key = event.keyCode ? event.keyCode : event.which;
+	//scoreboard.innerHTML = "Keycode: " + key;
+
+	var scene = gameState.scene;
+	var sphere;
+
+	if (key == 37) { // left
+		sphere = scene.getObjectByName( "leftSphere", true );
+	}
+	else if (key == 39) { // right
+		sphere = scene.getObjectByName( "rightSphere", true );
+	}
+	else if (key == 38) { // up
+		sphere = scene.getObjectByName( "upSphere", true );
+	}
+	else if (key == 40) { // down
+		sphere = scene.getObjectByName( "downSphere", true );
+	}
+	if (sphere.scale.x > 1.0) {
+		gameState.score++;
+		scoreboard.innerHTML = "score: " + gameState.score;
+		sphere.scale.set(1.0, 1.0, 1.0);
+		expandRandom(sphere);
+	}
+}
+
+var expandRandom = function(oldSphere)
+{
+	var sphereNames = ["leftSphere", "rightSphere", "upSphere", "downSphere"];
+	var snum = Math.floor(Math.random() * 4.0);
+	var sphere = gameState.scene.getObjectByName( sphereNames[snum], true );
+	if (oldSphere != undefined && sphere.name == oldSphere.name) {
+		snum = (snum+1)%4;
+		sphere = gameState.scene.getObjectByName( sphereNames[snum], true );
+	}
+	sphere.scale.set(1.8,1.8,1.8);
+}
+
+var sceneControl = function(node)
+{
+	//debug("sceneControl\n");
+}
+
+</script>
+
+</body>
+</html>
+

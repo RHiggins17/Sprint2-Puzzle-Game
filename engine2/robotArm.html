@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+
+<!-- HTML HEAD ELEMENT - DEFINES CSS FOR THE PAGE -->
+<head>
+	<meta charset="utf-8">
+    <style>
+	    body { background-color: #002200; }
+	    h3,p { color: #FFFF00; }
+	    canvas { background-color: #000044; }
+	    #debugContainer { color: #FFFFFF; position: absolute; z-index: 100;}
+    </style>
+    <title>Robot Arm</title>
+</head>
+
+<!-- ==================================================================== -->
+
+<!-- HTML BODY TAG - DEFINES THE HTML LAYOUT FOR THE PAGE -->
+<body oncontextmenu="return false;">
+
+<!-- INCLUDE SCRIPTS -->
+<script src="../threejs/build/three.js"></script>
+<script src="gameEngine2.js"></script>
+
+<!-- GAME SPECIFIC INCLUDES -->
+<script src="robotArmData.js"></script>
+
+<!-- DEFINE LEFT DIV TAG - FOR DEBUG PRINTOUTS -->
+<div id="debugContainer">
+<pre id="debug"></pre>
+</div>
+
+<!-- MAKE CANVAS AND OTHER STARTING ELEMENTS  -->
+<center>
+	<br/>
+	<canvas id="gameCanvas" width="600" height="400"></canvas>
+	<h3 id="scoreboard">Robot Arm</h3>
+</center>
+
+
+<script>
+//----------------------------------------------------------------------//
+// THE MAIN CODE FOR THE GAME
+//----------------------------------------------------------------------//
+
+window.onload = function()
+{
+	// Initialize the engine
+	engine.DEBUG = false;
+	var canvas = document.getElementById("gameCanvas");
+	initEngine(canvas);
+
+	// Parse level0 (into a Three.js scene) and star the game loop
+	parseScene(level0); // upfront loaded Javscript object
+	startGameLoop();
+}
+
+//----------------------------------------------------------------------//
+// EVENT HANDLERS
+//----------------------------------------------------------------------//
+
+var robotController = function(sceneNode)
+{
+	debug("controller");
+
+	var joint0 = sceneNode;
+	var joint1 = sceneNode.getObjectByName("joint1", true);
+
+	// up and down arrow keys
+	var r1 = 0.0;
+	if (engine.pressedKeys[38]) r1 = 0.1;
+	if (engine.pressedKeys[40]) r1 = -0.1;
+
+	if (r1 != 0.0) {
+		joint1.rotateOnAxis(constants.ZAXIS, r1);
+	}
+
+	var r0 = 0.0;
+	if (engine.pressedKeys[37]) r0 = 0.1;
+	if (engine.pressedKeys[39]) r0 = -0.1;
+
+	if (r0 != 0.0) {
+		joint0.rotateOnAxis(constants.ZAXIS, r0);
+	}
+}
+
+</script>
+
+</body>
+</html>
