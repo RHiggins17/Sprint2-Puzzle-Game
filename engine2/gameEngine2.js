@@ -608,15 +608,37 @@ function parseDirectionalLight(jsonNode)
 	// Start with default values
 	var color = [1.0, 1.0, 1.0];
 	var position = [1.0, 1.0, 1.0];
+	var intensity = 1;
+	var castShadow = false;
+	var target;
+	var mapSize = 1024;
+	var map;
+	var bias = 0;
+	var radius;
 
 	// Replace with data from jsonNode
 	if ("color"    in jsonNode) color    = jsonNode["color"];
 	if ("position" in jsonNode) position = jsonNode["position"];
+	if ("intensity" in jsonNode) intensity = jsonNode["intensity"];
+	if ("castShadow" in jsonNode) castShadow = jsonNode["castShadow"];
+	if ("target" in jsonNode) target = jsonNode["target"];
+	if ("mapSize" in jsonNode) mapSize = jsonNode["mapSize"];
+	if ("map" in jsonNode) map = jsonNode["map"];
+	if ("bias" in jsonNode) bias = jsonNode["bias"];
+	if ("radius" in jsonNode) radius = jsonNode["radius"];
 
 	// Create the light and return it
 	var c = new THREE.Color(color[0], color[1], color[2]);	
-	var light = new THREE.DirectionalLight( c );
+	var light = new THREE.DirectionalLight(c, intensity);
 	light.position.set( position[0], position[1], position[2] );
+	
+	light.castShadow = castShadow;
+	light.shadow.mapSize.width = mapSize;
+	light.shadow.mapSize.height = mapSize;
+	light.map = map;
+	light.bias = bias;
+	light.radius = radius;
+	
 	return light;
 }
 
@@ -627,15 +649,20 @@ function parseAmbientLight(jsonNode)
 	// Start with default values
 	var color = [1.0, 1.0, 1.0];
 	var position = [1.0, 1.0, 1.0];
+	var intensity = 1;
+	var castShadow = false;
 
 	// Replace with data from jsonNode
 	if ("color"    in jsonNode) color    = jsonNode["color"];
 	if ("position" in jsonNode) position = jsonNode["position"];
+	if ("intensity" in jsonNode) intensity = jsonNode["intensity"];
+	if ("castShadow" in jsonNode) castShadow = jsonNode["castShadow"];
 
 	// Create the light and return it
 	var c = new THREE.Color(color[0], color[1], color[2]);	
-	var light = new THREE.AmbientLight( c );
+	var light = new THREE.AmbientLight(c, intensity);
 	light.position.set( position[0], position[1], position[2] );
+	light.castShadow = castShadow;
 	return light;
 }
 
@@ -646,15 +673,41 @@ function parsePointLight(jsonNode)
 	// Start with default values
 	var color = [1.0, 1.0, 1.0];
 	var position = [1.0, 1.0, 1.0];
+	var intensity = 1;
+	var decay = 1;
+	var distance = 0;
+	var power = 4*Math.PI;
+	var castShadow = false;
+	var map;
+	var mapSize = 512;
+	var bias = 0;
+	var radius;
 
 	// Replace with data from jsonNode
 	if ("color"    in jsonNode) color    = jsonNode["color"];
 	if ("position" in jsonNode) position = jsonNode["position"];
+	if ("intensity" in jsonNode) intensity = jsonNode["intensity"];
+	if ("power" in jsonNode) power = jsonNode["power"];
+	if ("decay" in jsonNode) decay = jsonNode["decay"];
+	if ("distance" in jsonNode) distance = jsonNode["distance"];
+	if ("castShadow" in jsonNode) castShadow = jsonNode["castShadow"];
+	if ("map" in jsonNode) map = jsonNode["map"];
+	if ("mapSize" in jsonNode) mapSize = jsonNode["mapSize"];
+	if ("bias" in jsonNode) bias = jsonNode["bias"];
+	if ("radius" in jsonNode) radius = jsonNode["radius"];
 
 	// Create the light and return it
 	var c = new THREE.Color(color[0], color[1], color[2]);	
-	var light = new THREE.PointLight( c );
+	var light = new THREE.PointLight(c, intensity, distance, decay);
 	light.position.set( position[0], position[1], position[2] );
+	
+	light.castShadow = castShadow;
+	light.shadow.mapSize.width = mapSize;
+	light.shadow.mapSize.height = mapSize;
+	light.map = map;
+	light.bias = bias;
+	light.radius = radius;
+	
 	return light;
 }
 
@@ -663,17 +716,33 @@ function parseHemisphereLight(jsonNode)
 	//debug("parseDirectionalLight\n");
 
 	// Start with default values
+	var skyColor = [1.0, 1.0, 1.0];
 	var color = [1.0, 1.0, 1.0];
+	var groundColor = [0, 0, 0];
+	var intensity = 1;
 	var position = [1.0, 1.0, 1.0];
+	var castShadow = undefined;
+	
 
 	// Replace with data from jsonNode
-	if ("color"    in jsonNode) color    = jsonNode["color"];
+	if ("skyColor"    in jsonNode) skyColor = jsonNode["skyColor"];
+	if ("color"    in jsonNode) color = jsonNode["color"];
+	if ("groundColor"    in jsonNode) groundColor = jsonNode["groundColor"];
+	if ("intensity"    in jsonNode) intensity = jsonNode["intensity"];
 	if ("position" in jsonNode) position = jsonNode["position"];
-
+	
+	if(color != [1.0, 1.0, 1.0])
+	{
+		skyColor = color;
+	}
+	
 	// Create the light and return it
-	var c = new THREE.Color(color[0], color[1], color[2]);	
-	var light = new THREE.HemisphereLight( c );
+	var skyC = new THREE.Color(skyColor[0], skyColor[1], skyColor[2]);	
+	var groundC = new THREE.Color(groundColor[0], groundColor[1], groundColor[2]);	
+	var light = new THREE.HemisphereLight(skyC, groundC, intensity);
 	light.position.set( position[0], position[1], position[2] );
+	light.castShadow = castShadow;
+	
 	return light;
 }
 
@@ -684,15 +753,49 @@ function parseSpotLight(jsonNode)
 	// Start with default values
 	var color = [1.0, 1.0, 1.0];
 	var position = [1.0, 1.0, 1.0];
+	var intensity = 1;
+	var angle = Math.PI/3;
+	var penumbra = 0;
+	var decay = 1;
+	var distance = 0;
+	var castShadow = false;
+	var mapSize = 1024;
+	var target;
+	var map;
+	var bias = 0;
+	var radius;
 
 	// Replace with data from jsonNode
 	if ("color"    in jsonNode) color    = jsonNode["color"];
 	if ("position" in jsonNode) position = jsonNode["position"];
+	if ("intensity" in jsonNode) intensity = jsonNode["intensity"];
+	if ("angle" in jsonNode) angle= jsonNode["angle"];
+	if ("penumbra" in jsonNode) penumbra = jsonNode["penumbra"];
+	if ("decay" in jsonNode) decay = jsonNode["decay"];
+	if ("distance" in jsonNode) distance = jsonNode["distance"];
+	if ("castShadow" in jsonNode) castShadow = jsonNode["castShadow"];
+	if ("mapSize" in jsonNode) mapSize = jsonNode["mapSize"];
+	if ("target" in jsonNode) target = jsonNode["target"];
+	if ("map" in jsonNode) map = jsonNode["map"];
+	if ("bias" in jsonNode) bias = jsonNode["bias"];
+	if ("radius" in jsonNode) radius = jsonNode["radius"];
 
 	// Create the light and return it
 	var c = new THREE.Color(color[0], color[1], color[2]);	
-	var light = new THREE.SpotLight( c );
+	var light = new THREE.SpotLight(c, intensity, distance, angle, penumbra, decay);
 	light.position.set( position[0], position[1], position[2] );
+	light.castShadow = castShadow;
+	
+	light.shadow.mapSize.width = mapSize;
+	light.shadow.mapSize.height = mapSize;
+	light.map = map;
+	light.bias = bias;
+	light.radius = radius;
+    //
+	//light.shadow.camera.near = 500;
+	//light.shadow.camera.far = 4000;
+	//light.shadow.camera.fov = 30;
+	
 	return light;
 }
 
@@ -750,22 +853,124 @@ function parseMaterial(jsonNode)
 	if (type == "meshLambertMaterial")
 	{
 		var material = new THREE.MeshLambertMaterial();
-		if ("diffuseColor" in jsonNode) {
-			var d = jsonNode["diffuseColor"];
-			material.color = new THREE.Color(d[0], d[1], d[2]);
-		}
 		if ("color" in jsonNode) {
 			var d = jsonNode["color"];
 			material.color = new THREE.Color(d[0], d[1], d[2]);
 		}
-		if ("diffuseMap" in jsonNode) {
-			var tex = parseTexture( jsonNode["diffuseMap"] );
-			material.map = tex;
+		if ("diffuseColor" in jsonNode) {
+			var d = jsonNode["diffuseColor"];
+			material.color = new THREE.Color(d[0], d[1], d[2]);
+		}
+		if ("specularColor" in jsonNode) {
+			var d = jsonNode["specularColor"];
+			material.specular = new THREE.Color(d[0], d[1], d[2]);
+		}
+		if ("emissiveColor" in jsonNode) {
+			var d = jsonNode["emissiveColor"];
+			material.color = new THREE.Color(d[0], d[1], d[2]);
 		}
 		if ("map" in jsonNode) {
 			var tex = parseTexture( jsonNode["map"] );
 			material.map = tex;
 		}
+		if ("diffuseMap" in jsonNode) {
+			var tex = parseTexture( jsonNode["diffuseMap"] );
+			material.map = tex;
+		}
+		if ("emissiveMap" in jsonNode) {
+			var tex = parseTexture( jsonNode["emissiveMap"] );
+			material.emissiveMap = tex;
+		}
+		if ("envMap" in jsonNode) {
+			var tex = parseTexture( jsonNode["envMap"] );
+			material.envMap = tex;
+		}
+		if ("alphaMap" in jsonNode) {
+			var tex = parseTexture( jsonNode["alphaMap"] );
+			material.alphaMap = tex;
+		}
+		if ("aoMap" in jsonNode) {
+			var tex = parseTexture( jsonNode["aoMap"] );
+			material.aoMap = tex;
+		}
+		if ("lightMap" in jsonNode) {
+			var tex = parseTexture( jsonNode["lightMap"] );
+			material.lightMap = tex;
+		}
+		if ("emissiveIntensity" in jsonNode) {
+			material.emissiveIntensity = jsonNode["emissiveIntensity"];
+		}
+		if ("aoMapIntensity" in jsonNode) {
+			material.aoMapIntensity = jsonNode["aoMapIntensity"];
+		}
+		if ("lightMapIntensity" in jsonNode) {
+			material.lightMapIntensity = jsonNode["lightMapIntensity"];
+		}
+		if ("reflectivity" in jsonNode) {
+			material.reflectivity = jsonNode["reflectivity"];
+		}
+		if ("skinning" in jsonNode) {
+			material.skinning = jsonNode["skinning"];
+		}
+		if ("wireframe" in jsonNode) {
+			material.wireframe = jsonNode["wireframe"];
+		}
+		if ("wireframeLinecap" in jsonNode) {
+			material.wireframeLinecap = jsonNode["wireframeLinecap"];
+		}
+		if ("wireframeLinejoin" in jsonNode) {
+			material.wireframeLinejoin = jsonNode["wireframeLinejoin"];
+		}
+		if ("wireframeLinewidth" in jsonNode) {
+			material.wireframeLinewidth = jsonNode["wireframeLinewidth"];
+		}
+		if ("morphNormals" in jsonNode) {
+			material.morphNormals = jsonNode["morphNormals"];
+		}
+		if ("morphTargets" in jsonNode) {
+			material.morphTargets = jsonNode["morphTargets"];
+		}
+		//if ("refractionRatio" in jsonNode) {
+		//	var s = jsonNode["refractionRatio"];
+		//	material.skinning = s;
+		//}
+		//if ("combine" in jsonNode) {
+		//	var intensity = jsonNode["lightMapIntensity"];
+		//	material.intensity = intensity;
+		//}
+		//Common Material Properties
+		if ("opacity" in jsonNode) {
+			material.opacity = jsonNode["opacity"];
+		}
+		if ("transparent" in jsonNode) {
+			material.transparent = jsonNode["transparent"];
+		}
+		if ("visible" in jsonNode) {
+			material.visible = jsonNode["visible"];
+		}
+		if ("flatShading" in jsonNode) {
+			material.flatShading = jsonNode["flatShading"];
+		}
+		if ("shading" in jsonNode) {
+			var s = jsonNode["shading"];
+			material.shading = s;
+		}
+		if ("fog" in jsonNode) {
+			material.fog = jsonNode["fog"];
+		}
+		if ("wraparound" in jsonNode) {
+			material.wraparound = jsonNode["wraparound"];
+		}
+		if ("alphaTest" in jsonNode) {
+			material.alphaTest = jsonNode["alphaTest"];
+		}
+		if ("depthWrite" in jsonNode) {
+			material.depthWrite = jsonNode["depthWrite"];
+		}
+		if ("lights" in jsonNode) {
+			material.lights = jsonNode["lights"];
+		}
+		
 		return material;
 	}
 
@@ -789,6 +994,85 @@ function parseMaterial(jsonNode)
 			var tex = parseTexture( jsonNode["diffuseMap"] );
 			material.map = tex;
 		}
+		if ("envMap" in jsonNode) {
+			var tex = parseTexture( jsonNode["envMap"] );
+			material.envMap = tex;
+		}
+		if ("alphaMap" in jsonNode) {
+			var tex = parseTexture( jsonNode["alphaMap"] );
+			material.alphaMap = tex;
+		}
+		if ("aoMap" in jsonNode) {
+			var tex = parseTexture( jsonNode["aoMap"] );
+			material.aoMap = tex;
+		}
+		if ("lightMap" in jsonNode) {
+			var tex = parseTexture( jsonNode["lightMap"] );
+			material.lightMap = tex;
+		}
+		if ("aoMapIntensity" in jsonNode) {
+			material.aoMapIntensity = jsonNode["aoMapIntensity"];
+		}
+		if ("lightMapIntensity" in jsonNode) {
+			material.lightMapIntensity = jsonNode["lightMapIntensity"];
+		}
+		if ("reflectivity" in jsonNode) {
+			material.reflectivity = jsonNode["reflectivity"];
+		}
+		if ("skinning" in jsonNode) {
+			material.skinning = jsonNode["skinning"];
+		}
+		if ("wireframe" in jsonNode) {
+			material.wireframe = jsonNode["wireframe"];
+		}
+		if ("wireframeLinecap" in jsonNode) {
+			material.wireframeLinecap = jsonNode["wireframeLinecap"];
+		}
+		if ("wireframeLinejoin" in jsonNode) {
+			material.wireframeLinejoin = jsonNode["wireframeLinejoin"];
+		}
+		if ("wireframeLinewidth" in jsonNode) {
+			material.wireframeLinewidth = jsonNode["wireframeLinewidth"];
+		}
+		if ("morphNormals" in jsonNode) {
+			material.morphNormals = jsonNode["morphNormals"];
+		}
+		if ("morphTargets" in jsonNode) {
+			material.morphTargets = jsonNode["morphTargets"];
+		}
+		//Common Material Properties
+		if ("opacity" in jsonNode) {
+			material.opacity = jsonNode["opacity"];
+		}
+		if ("transparent" in jsonNode) {
+			material.transparent = jsonNode["transparent"];
+		}
+		if ("visible" in jsonNode) {
+			material.visible = jsonNode["visible"];
+		}
+		if ("flatShading" in jsonNode) {
+			material.flatShading = jsonNode["flatShading"];
+		}
+		if ("shading" in jsonNode) {
+			var s = jsonNode["shading"];
+			material.shading = s;
+		}
+		if ("fog" in jsonNode) {
+			material.fog = jsonNode["fog"];
+		}
+		if ("wraparound" in jsonNode) {
+			material.wraparound = jsonNode["wraparound"];
+		}
+		if ("alphaTest" in jsonNode) {
+			material.alphaTest = jsonNode["alphaTest"];
+		}
+		if ("depthWrite" in jsonNode) {
+			material.depthWrite = jsonNode["depthWrite"];
+		}
+		if ("lights" in jsonNode) {
+			material.lights = jsonNode["lights"];
+		}
+		
 		return material;
 	}
 	
@@ -812,6 +1096,79 @@ function parseMaterial(jsonNode)
 			var tex = parseTexture( jsonNode["diffuseMap"] );
 			material.map = tex;
 		}
+		if ("envMap" in jsonNode) {
+			var tex = parseTexture( jsonNode["envMap"] );
+			material.envMap = tex;
+		}
+		if ("alphaMap" in jsonNode) {
+			var tex = parseTexture( jsonNode["alphaMap"] );
+			material.alphaMap = tex;
+		}
+		if ("aoMap" in jsonNode) {
+			var tex = parseTexture( jsonNode["aoMap"] );
+			material.aoMap = tex;
+		}
+		if ("lightMap" in jsonNode) {
+			var tex = parseTexture( jsonNode["lightMap"] );
+			material.lightMap = tex;
+		}
+		if ("reflectivity" in jsonNode) {
+			material.reflectivity = jsonNode["reflectivity"];
+		}
+		if ("skinning" in jsonNode) {
+			material.skinning = jsonNode["skinning"];
+		}
+		if ("wireframe" in jsonNode) {
+			material.wireframe = jsonNode["wireframe"];
+		}
+		if ("wireframeLinecap" in jsonNode) {
+			material.wireframeLinecap = jsonNode["wireframeLinecap"];
+		}
+		if ("wireframeLinejoin" in jsonNode) {
+			material.wireframeLinejoin = jsonNode["wireframeLinejoin"];
+		}
+		if ("wireframeLinewidth" in jsonNode) {
+			material.wireframeLinewidth = jsonNode["wireframeLinewidth"];
+		}
+		if ("morphNormals" in jsonNode) {
+			material.morphNormals = jsonNode["morphNormals"];
+		}
+		if ("morphTargets" in jsonNode) {
+			material.morphTargets = jsonNode["morphTargets"];
+		}
+		//Common Material Properties
+		if ("opacity" in jsonNode) {
+			material.opacity = jsonNode["opacity"];
+		}
+		if ("transparent" in jsonNode) {
+			material.transparent = jsonNode["transparent"];
+		}
+		if ("visible" in jsonNode) {
+			material.visible = jsonNode["visible"];
+		}
+		if ("flatShading" in jsonNode) {
+			material.flatShading = jsonNode["flatShading"];
+		}
+		if ("shading" in jsonNode) {
+			var s = jsonNode["shading"];
+			material.shading = s;
+		}
+		if ("fog" in jsonNode) {
+			material.fog = jsonNode["fog"];
+		}
+		if ("wraparound" in jsonNode) {
+			material.wraparound = jsonNode["wraparound"];
+		}
+		if ("alphaTest" in jsonNode) {
+			material.alphaTest = jsonNode["alphaTest"];
+		}
+		if ("depthWrite" in jsonNode) {
+			material.depthWrite = jsonNode["depthWrite"];
+		}
+		if ("lights" in jsonNode) {
+			material.lights = jsonNode["lights"];
+		}
+		
 		return material;
 	}
 	
@@ -826,13 +1183,17 @@ function parseMaterial(jsonNode)
 			var d = jsonNode["diffuseColor"];
 			material.color = new THREE.Color(d[0], d[1], d[2]);
 		}
-		if ("bumpMap" in jsonNode) {
-			var d = jsonNode["bumpMap"];
+		if ("specularColor" in jsonNode) {
+			var d = jsonNode["specularColor"];
+			material.specular = new THREE.Color(d[0], d[1], d[2]);
+		}
+		if ("emissiveColor" in jsonNode) {
+			var d = jsonNode["emissiveColor"];
 			material.color = new THREE.Color(d[0], d[1], d[2]);
 		}
-		if ("bumpScale" in jsonNode) {
-			var d = jsonNode["bumpScale"];
-			material.color = new THREE.Color(d[0], d[1], d[2]);
+		if ("shininess" in jsonNode) {
+			var d = jsonNode["shininess"];
+			material.shininess = d;
 		}
 		if ("map" in jsonNode) {
 			var tex = parseTexture( jsonNode["map"] );
@@ -842,6 +1203,127 @@ function parseMaterial(jsonNode)
 			var tex = parseTexture( jsonNode["diffuseMap"] );
 			material.map = tex;
 		}
+		if ("emissiveMap" in jsonNode) {
+			var tex = parseTexture( jsonNode["emissiveMap"] );
+			material.emissiveMap = tex;
+		}
+		if ("envMap" in jsonNode) {
+			var tex = parseTexture( jsonNode["envMap"] );
+			material.envMap = tex;
+		}
+		if ("alphaMap" in jsonNode) {
+			var tex = parseTexture( jsonNode["alphaMap"] );
+			material.alphaMap = tex;
+		}
+		if ("aoMap" in jsonNode) {
+			var tex = parseTexture( jsonNode["aoMap"] );
+			material.aoMap = tex;
+		}
+		if ("lightMap" in jsonNode) {
+			var tex = parseTexture( jsonNode["lightMap"] );
+			material.lightMap = tex;
+		}
+		if ("specularMap" in jsonNode) {
+			var tex = parseTexture( jsonNode["specularMap"] );
+			material.specularMap = tex;
+		}
+		if ("displacementMap" in jsonNode) {
+			var tex = parseTexture( jsonNode["displacementMap"] );
+			material.displacementMap = tex;
+		}
+		if ("bumpMap" in jsonNode) {
+			var tex = parseTexture( jsonNode["bumpMap"] );
+			material.bumpMap = tex;
+		}
+		if ("normalMap" in jsonNode) {
+			var tex = parseTexture( jsonNode["normalMap"] );
+			material.normalMap = tex;
+		}
+		if ("bumpScale" in jsonNode) {
+			var d = jsonNode["bumpScale"];
+			material.bumpScale = d;
+		}
+		if ("displacementScale" in jsonNode) {
+			var d = jsonNode["displacementScale"];
+			material.displacementScale = d;
+		}
+		if ("normalScale" in jsonNode) {
+			var d = jsonNode["normalScale"];
+			material.normalScale = d;
+		}
+		if ("displacementBias" in jsonNode) {
+			var d = jsonNode["displacementBias"];
+			material.displacementBias = d;
+		}
+		if ("emissiveIntensity" in jsonNode) {
+			material.emissiveIntensity = jsonNode["emissiveIntensity"];
+		}
+		if ("aoMapIntensity" in jsonNode) {
+			material.aoMapIntensity = jsonNode["aoMapIntensity"];
+		}
+		if ("lightMapIntensity" in jsonNode) {
+			material.lightMapIntensity = jsonNode["lightMapIntensity"];
+		}
+		if ("reflectivity" in jsonNode) {
+			material.reflectivity = jsonNode["reflectivity"];
+		}
+		if ("skinning" in jsonNode) {
+			material.skinning = jsonNode["skinning"];
+		}
+		if ("wireframe" in jsonNode) {
+			material.wireframe = jsonNode["wireframe"];
+		}
+		if ("wireframeLinecap" in jsonNode) {
+			material.wireframeLinecap = jsonNode["wireframeLinecap"];
+		}
+		if ("wireframeLinejoin" in jsonNode) {
+			material.wireframeLinejoin = jsonNode["wireframeLinejoin"];
+		}
+		if ("wireframeLinewidth" in jsonNode) {
+			material.wireframeLinewidth = jsonNode["wireframeLinewidth"];
+		}
+		if ("morphNormals" in jsonNode) {
+			material.morphNormals = jsonNode["morphNormals"];
+		}
+		if ("morphTargets" in jsonNode) {
+			material.morphTargets = jsonNode["morphTargets"];
+		}
+		if ("metal" in jsonNode) {
+			material.metal = jsonNode["metal"];
+		}
+		//Common Material Properties
+		if ("opacity" in jsonNode) {
+			material.opacity = jsonNode["opacity"];
+		}
+		if ("transparent" in jsonNode) {
+			material.transparent = jsonNode["transparent"];
+		}
+		if ("visible" in jsonNode) {
+			material.visible = jsonNode["visible"];
+		}
+		if ("flatShading" in jsonNode) {
+			material.flatShading = jsonNode["flatShading"];
+		}
+		if ("shading" in jsonNode) {
+			var s = jsonNode["shading"];
+			material.shading = s;
+		}
+		if ("fog" in jsonNode) {
+			material.fog = jsonNode["fog"];
+		}
+		if ("wraparound" in jsonNode) {
+			material.wraparound = jsonNode["wraparound"];
+		}
+		if ("alphaTest" in jsonNode) {
+			material.alphaTest = jsonNode["alphaTest"];
+		}
+		if ("depthWrite" in jsonNode) {
+			material.depthWrite = jsonNode["depthWrite"];
+		}
+		if ("lights" in jsonNode) {
+			material.lights = jsonNode["lights"];
+		}
+		
 		return material;
 	}
 
